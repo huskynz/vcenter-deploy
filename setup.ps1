@@ -1,5 +1,6 @@
 # ===============================
 # Full VCSA Deployment + Post-Config Script with Licensing
+# PowerShell 5 Compatible Version
 # ===============================
 
 $ErrorActionPreference = "Stop"
@@ -10,12 +11,12 @@ function Import-DotEnv {
         throw "Env file $Path not found"
     }
     Get-Content $Path | ForEach-Object {
-        if ($_ -match '^\s*#') { return }   # skip comments
-        if ($_ -match '^\s*$') { return }   # skip empty lines
+        if ($_ -match '^\s*#') { return }
+        if ($_ -match '^\s*$') { return }
         $parts = $_ -split '=', 2
         if ($parts.Length -eq 2) {
             $key = $parts[0].Trim()
-            $value = $parts[1].Trim('"')  # Remove quotes if present
+            $value = $parts[1].Trim('"')
             [System.Environment]::SetEnvironmentVariable($key, $value)
         }
     }
@@ -26,47 +27,67 @@ Import-DotEnv
 
 # Read env vars
 $VCSADeployCLI   = $env:VCSA_CLI_PATH
-$VCSAHost        = $env:VCSA_HOST
-
 $ESXiHost        = $env:ESXI_HOST
 $ESXiUser        = $env:ESXI_USER
 $ESXiPassword    = $env:ESXI_PASSWORD
-
 $VCSAName        = $env:VCSA_HOST
 $VCSARootPass    = $env:VCSA_ROOT_PASSWORD
-
 $VCPassword      = $env:VC_PASSWORD
-
-$DatacenterName  = $env:DATACENTER_NAME
-$ClusterName     = $env:CLUSTER_NAME
-
 $NTPServers      = $env:NTP_SERVERS -split ','
-
 $DeploymentNetwork = $env:DEPLOYMENT_NETWORK
 $Datastore         = $env:DATASTORE
 $ThinDiskMode      = [bool]::Parse($env:THIN_DISK_MODE)
 $DeploymentOption  = $env:DEPLOYMENT_OPTION
-
 $IPAddress        = $env:IP_ADDRESS
 $DnsServers       = $env:DNS_SERVERS -split ','
 $NetworkPrefix    = $env:NETWORK_PREFIX
 $Gateway          = $env:GATEWAY
-
 $SsoDomain        = $env:SSO_DOMAIN
-$SsoSite          = $env:SSO_SITE
-
 $CeipSettings     = [bool]::Parse($env:CEIP_SETTINGS)
-
-$BannerMsg        = $env:BANNER_MSG
-$LegalNotice      = $env:LEGAL_NOTICE
-$InstanceName     = $env:INSTANCE_NAME
 $OrgName          = $env:ORG_NAME
 
-$VCLicenseKey     = $env:VC_LICENSE_KEY
-$ESXiLicenseKey   = $env:ESXI_LICENSE_KEY
+$currentTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+$width = 60
+$title = "$OrgName Vcenter Deployment Script"
+
+# Center the title inside the width minus 2 (for frame sides)
+$paddingLeft = [Math]::Floor(($width - 2 - $title.Length) / 2)
+$paddingRight = $width - 2 - $title.Length - $paddingLeft
+$centeredTitle = (' ' * $paddingLeft) + $title + (' ' * $paddingRight)
+
+# Simple ASCII frame chars
+$topLine    = "_" * $width
+$bottomLine = "-" * $width
+$sideChar   = "|"
+
+# Helper to pad lines correctly
+function Write-Line($text) {
+    $padding = $width - 2 - $text.Length
+    if ($padding -lt 0) { $padding = 0 }
+    Write-Host "$sideChar$text" -NoNewline
+    Write-Host (" " * $padding) -NoNewline
+    Write-Host "$sideChar"
+}
+
+Write-Host $topLine -ForegroundColor Cyan
+Write-Line ($centeredTitle)
+Write-Line ""  # empty line
+
+Write-Line (" VCSA Hostname       : $VCSAName")
+Write-Line (" ESXi Host           : $ESXiHost")
+Write-Line (" Deployment Option   : $DeploymentOption")
+Write-Line (" Network IP          : $IPAddress")
+Write-Line (" Deployment Time     : $currentTime")
+Write-Line ""  # empty line
+
+Write-Host $bottomLine -ForegroundColor Cyan
+Write-Host ""
+
+
+
 
 if (-not $VCSARootPass) {
-    Write-Host "[ERROR] VCSA root password ([1mVCSA_ROOT_PASSWORD[0m) is not set in the environment or .env file. Exiting." -ForegroundColor Red
+    Write-Host "[ERROR] VCSA root password (VCSA_ROOT_PASSWORD) is not set in the environment or .env file. Exiting." -ForegroundColor Red
     exit 1
 }
 
@@ -78,7 +99,7 @@ if (Test-Path ".\vcenter-deploy.json") {
 $ThinDiskModeJson = $ThinDiskMode.ToString().ToLower()
 $CeipSettingsJson = $CeipSettings.ToString().ToLower()
 
-# Generate JSON config manually to ensure correct order
+# Generate JSON config
 $jsonContent = @"
 {
   "__version": "2.13",
@@ -122,88 +143,69 @@ $jsonContent = @"
 }
 "@
 
-# Save JSON to file
+# Save JSON
 $tempJsonPath = ".\vcenter-deploy.json"
 $jsonContent | Set-Content $tempJsonPath
 Write-Host "[+] Generated JSON config file at $tempJsonPath" -ForegroundColor Green
 
-# Debug: Show the generated JSON
-Write-Host "[DEBUG] Generated JSON content:" -ForegroundColor Yellow
-Get-Content $tempJsonPath | Write-Host
+# PowerCLI install/setup logic (re-added for Get-VM functionality)
+function Ensure-PowerCLI {
+    if (Get-Command -Name Connect-VIServer -ErrorAction SilentlyContinue) {
+        try {
+            Get-PowerCLIConfiguration -ErrorAction Stop | Out-Null
+            Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false | Out-Null
+            Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$false | Out-Null
+            return
+        } catch {
+            # fall through to reinstall
+        }
+    }
 
-# Run the VCSA deploy CLI
-Write-Host "[+] Starting VCSA deployment..." -ForegroundColor Cyan
-& $VCSADeployCLI install $tempJsonPath --accept-eula --no-ssl-certificate-verification
+    Write-Host "[INFO] Installing or Reinstalling PowerCLI..." -ForegroundColor Yellow
+    # Aggressively uninstall all VMware modules to prevent assembly conflicts
+    Get-Module -ListAvailable | Where-Object {$_.Name -like "VMware.*"} | Uninstall-Module -Force -ErrorAction SilentlyContinue
 
-# Wait for vCenter API to become responsive
-Write-Host "[+] Waiting for vCenter to become reachable..."
-do {
-    Start-Sleep -Seconds 10
-    try {
-        $resp = Invoke-WebRequest -Uri "https://$VCSAHost" -UseBasicParsing -TimeoutSec 5
-    } catch { $resp = $null }
-} while (-not $resp)
-Write-Host "[✓] vCenter is up." -ForegroundColor Green
+    if (-not (Get-PSRepository | Where-Object { $_.Name -eq 'PSGallery' })) {
+        Register-PSRepository -Default
+    }
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 
-# Load PowerCLI
-if (-not (Get-Module -ListAvailable -Name VMware.PowerCLI)) {
-    Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force
-}
-Import-Module VMware.PowerCLI
-Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false | Out-Null
+    if (-not (Get-PackageProvider -ListAvailable | Where-Object { $_.Name -eq 'NuGet' })) {
+        Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+    }
 
-# Connect to vCenter
-Write-Host "[+] Connecting to vCenter..."
-Connect-VIServer -Server $VCSAHost -User "administrator@vsphere.local" -Password $VCPassword | Out-Null
-
-# Create datacenter
-Write-Host "[+] Creating datacenter $DatacenterName..."
-$dc = New-Datacenter -Name $DatacenterName
-
-# Create cluster with DRS and HA enabled
-Write-Host "[+] Creating cluster $ClusterName..."
-$cluster = New-Cluster -Name $ClusterName -Location $dc -DrsEnabled:$true -HAEnabled:$true
-
-# Add ESXi host to cluster
-Write-Host "[+] Adding ESXi host $ESXiHost..."
-Add-VMHost -Name $ESXiHost -Location $cluster -User $ESXiUser -Password $ESXiPassword | Out-Null
-
-# Configure NTP servers on ESXi host
-Write-Host "[+] Configuring NTP servers on ESXi host..."
-$vmhost = Get-VMHost -Name $ESXiHost
-foreach ($ntp in $NTPServers) {
-    Add-VMHostNtpServer -VMHost $vmhost -NtpServer $ntp -Confirm:$false
-}
-Start-VMHostService -HostService (Get-VMHostService -VMHost $vmhost | Where-Object {$_.Key -eq "ntpd"})
-
-# Apply branding and login banner settings
-Write-Host "[+] Applying branding and login banner..."
-Get-AdvancedSetting -Entity $global:DefaultVIServer -Name "Security.LoginBanner" | Set-AdvancedSetting -Value $BannerMsg -Confirm:$false
-Get-AdvancedSetting -Entity $global:DefaultVIServer -Name "Security.LoginBannerEnable" | Set-AdvancedSetting -Value "true" -Confirm:$false
-Get-AdvancedSetting -Entity $global:DefaultVIServer -Name "vpxd.banner" | Set-AdvancedSetting -Value $LegalNotice -Confirm:$false
-Set-AdvancedSetting -Entity $global:DefaultVIServer -Name "VirtualCenter.InstanceName" -Value $InstanceName -Confirm:$false
-Set-AdvancedSetting -Entity $global:DefaultVIServer -Name "VirtualCenter.OrganizationName" -Value $OrgName -Confirm:$false
-
-# Assign license key to vCenter
-if ($VCLicenseKey) {
-    Write-Host "[+] Assigning license key to vCenter..."
-    $licenseManager = Get-View LicenseManager
-    $licenseManager.AddLicense($VCLicenseKey)
-    $licenseManager.UpdateLicenseLabel($VCLicenseKey, "vCenter License")
-    $licenseManager.SetLicenseEdition($VCLicenseKey, "enterprise-plus") # adjust edition as needed
+    Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force -ErrorAction Stop
+    Import-Module VMware.PowerCLI -ErrorAction Stop
+    # Explicitly import VMware.Vim as well
+    Import-Module VMware.Vim -ErrorAction Stop
+    Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false | Out-Null
 }
 
-# Assign license key to ESXi host
-if ($ESXiLicenseKey) {
-    Write-Host "[+] Assigning license key to ESXi host..."
-    $vmhostView = Get-View -Id $vmhost.Id
-    $licenseAssignmentManager = Get-View $licenseManager.ExtensionData.LicenseAssignmentManager
-    $entity = New-Object VMware.Vim.ManagedObjectReference
-    $entity.Type = "HostSystem"
-    $entity.Value = $vmhostView.MoRef.Value
-    $licenseAssignmentManager.AssignLicense($ESXiLicenseKey, $entity)
-}
+Ensure-PowerCLI
 
-# Disconnect from vCenter
-Disconnect-VIServer * -Confirm:$false | Out-Null
-Write-Host "[✓] Deployment, licensing and post-configuration complete." -ForegroundColor Green
+# Connect to ESXi host for VM check
+Write-Host "[+] Connecting to ESXi host $ESXiHost for VM check..." -ForegroundColor Cyan
+Connect-VIServer -Server $ESXiHost -User $ESXiUser -Password $ESXiPassword -ErrorAction Stop | Out-Null
+
+# Check for existing VM and proceed with deployment if not found
+$vm = Get-VM -Name $VCSAName -ErrorAction SilentlyContinue
+
+if ($vm) {
+    Write-Host "[!] VM '$VCSAName' already exists. Exiting." -ForegroundColor Yellow
+    Disconnect-VIServer * -Confirm:$false | Out-Null
+    exit 0
+} else {
+    Write-Host "[+] VM '$VCSAName' does not exist. Proceeding with deployment..." -ForegroundColor Cyan
+    $deployResult = & $VCSADeployCLI install $tempJsonPath --accept-eula --no-ssl-certificate-verification
+    $exitCode = $LASTEXITCODE
+
+    if ($exitCode -eq 0) {
+        Write-Host "[SUCCESS] VCSA deployment completed successfully. Exiting." -ForegroundColor Green
+        Disconnect-VIServer * -Confirm:$false | Out-Null
+        exit 0
+    } else {
+        Write-Host "[ERROR] VCSA deployment failed." -ForegroundColor Red
+        Disconnect-VIServer * -Confirm:$false | Out-Null
+        exit 1
+    }
+}
