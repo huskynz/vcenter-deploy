@@ -19,7 +19,10 @@ This is a very simple script to automate the deployment+post deployment setup of
 
 ## Built With
 
-- Put what the project is built in
+- Powershell
+- Json
+- Git
+- Powercli
 
 ## Roadmap
 N/A
