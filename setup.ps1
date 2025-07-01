@@ -70,56 +70,70 @@ if (-not $VCSARootPass) {
     exit 1
 }
 
-# Generate JSON config object
-$deployConfig = [PSCustomObject]@{
-  __version = "2.13"
-  new_vcsa = @{
-    esxi = @{
-      hostname = $ESXiHost
-      username = $ESXiUser
-      password = $ESXiPassword
-      deployment_network = $DeploymentNetwork
-      datastore = $Datastore
+if (Test-Path ".\vcenter-deploy.json") {
+    Remove-Item ".\vcenter-deploy.json" -Force
+}
+
+# Convert booleans to lowercase strings for JSON
+$ThinDiskModeJson = $ThinDiskMode.ToString().ToLower()
+$CeipSettingsJson = $CeipSettings.ToString().ToLower()
+
+# Generate JSON config manually to ensure correct order
+$jsonContent = @"
+{
+  "__version": "2.13",
+  "new_vcsa": {
+    "esxi": {
+      "hostname": "$ESXiHost",
+      "username": "$ESXiUser",
+      "password": "$ESXiPassword",
+      "deployment_network": "$DeploymentNetwork",
+      "datastore": "$Datastore"
+    },
+    "appliance": {
+      "thin_disk_mode": $ThinDiskModeJson,
+      "deployment_option": "$DeploymentOption",
+      "name": "$VCSAName"
+    },
+    "network": {
+      "ip_family": "ipv4",
+      "mode": "static",
+      "ip": "$IPAddress",
+      "dns_servers": [$(($DnsServers | ForEach-Object { "`"$_`"" }) -join ',')],
+      "prefix": "$NetworkPrefix",
+      "gateway": "$Gateway",
+      "system_name": "$VCSAName"
+    },
+    "os": {
+      "password": "$VCSARootPass",
+      "ssh_enable": true,
+      "ntp_servers": [$(($NTPServers | ForEach-Object { "`"$_`"" }) -join ',')]
+    },
+    "sso": {
+      "password": "$VCPassword",
+      "domain_name": "$SsoDomain"
     }
-    appliance = @{
-      thin_disk_mode = $ThinDiskMode
-      deployment_option = $DeploymentOption
-      name = $VCSAName
+  },
+  "ceip": {
+    "settings": {
+      "ceip_enabled": $CeipSettingsJson
     }
-    network = @{
-      ip_family = "ipv4"
-      mode = "static"
-      ip = $IPAddress
-      dns_servers = $DnsServers
-      prefix = [int]$NetworkPrefix
-      gateway = $Gateway
-      system_name = $VCSAName
-    }
-    os = @{
-      password = $VCSARootPass
-      ssh_enable = $true
-      time_tools_sync = $true
-      ntp_servers = $NTPServers
-    }
-    sso = @{
-      password = $VCPassword
-      domain_name = $SsoDomain
-      site_name = $SsoSite
-    }
-  }
-  ceip = @{
-    settings = $CeipSettings
   }
 }
+"@
 
 # Save JSON to file
 $tempJsonPath = ".\vcenter-deploy.json"
-$deployConfig | ConvertTo-Json -Depth 10 | Set-Content $tempJsonPath
+$jsonContent | Set-Content $tempJsonPath
 Write-Host "[+] Generated JSON config file at $tempJsonPath" -ForegroundColor Green
+
+# Debug: Show the generated JSON
+Write-Host "[DEBUG] Generated JSON content:" -ForegroundColor Yellow
+Get-Content $tempJsonPath | Write-Host
 
 # Run the VCSA deploy CLI
 Write-Host "[+] Starting VCSA deployment..." -ForegroundColor Cyan
-& $VCSADeployCLI install $tempJsonPath --accept-eula --acknowledge-ceip --no-ssl-certificate-verification
+& $VCSADeployCLI install $tempJsonPath --accept-eula --no-ssl-certificate-verification
 
 # Wait for vCenter API to become responsive
 Write-Host "[+] Waiting for vCenter to become reachable..."
