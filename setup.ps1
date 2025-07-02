@@ -193,6 +193,7 @@ $vm = Get-VM -Name $VmName -ErrorAction SilentlyContinue
 
 if ($vm) {
     Write-Host "[!] VM '$VmName' already exists. Exiting." -ForegroundColor Yellow
+    Start-Process "https://$VCSAName/ui/"
     Disconnect-VIServer * -Confirm:$false | Out-Null
     exit 0
 } else {
@@ -224,6 +225,7 @@ exit `$exitCode
     # Handle result based on exit code
     if ($exitCode -eq 0) {
         Write-Host "[SUCCESS] VCSA deployment completed successfully. Exiting." -ForegroundColor Green
+        Start-Process "https://$VCSAName/ui/"
         Disconnect-VIServer * -Confirm:$false | Out-Null
         exit 0
     } else {
