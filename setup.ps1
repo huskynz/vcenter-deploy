@@ -45,6 +45,7 @@ $Gateway          = $env:GATEWAY
 $SsoDomain        = $env:SSO_DOMAIN
 $CeipSettings     = [bool]::Parse($env:CEIP_SETTINGS)
 $OrgName          = $env:ORG_NAME
+$VmName           = $env:VM_NAME
 
 $currentTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $width = 60
@@ -114,7 +115,7 @@ $jsonContent = @"
     "appliance": {
       "thin_disk_mode": $ThinDiskModeJson,
       "deployment_option": "$DeploymentOption",
-      "name": "$VCSAName"
+      "name": "$VmName"
     },
     "network": {
       "ip_family": "ipv4",
@@ -188,23 +189,47 @@ Write-Host "[+] Connecting to ESXi host $ESXiHost for VM check..." -ForegroundCo
 Connect-VIServer -Server $ESXiHost -User $ESXiUser -Password $ESXiPassword -ErrorAction Stop | Out-Null
 
 # Check for existing VM and proceed with deployment if not found
-$vm = Get-VM -Name $VCSAName -ErrorAction SilentlyContinue
+$vm = Get-VM -Name $VmName -ErrorAction SilentlyContinue
 
 if ($vm) {
-    Write-Host "[!] VM '$VCSAName' already exists. Exiting." -ForegroundColor Yellow
+    Write-Host "[!] VM '$VmName' already exists. Exiting." -ForegroundColor Yellow
+    Start-Process "https://$VCSAName/ui/"
     Disconnect-VIServer * -Confirm:$false | Out-Null
     exit 0
 } else {
-    Write-Host "[+] VM '$VCSAName' does not exist. Proceeding with deployment..." -ForegroundColor Cyan
-    $deployResult = & $VCSADeployCLI install $tempJsonPath --accept-eula --no-ssl-certificate-verification
-    $exitCode = $LASTEXITCODE
+    Write-Host "[+] VM '$VmName' does not exist. Proceeding with deployment..." -ForegroundColor Cyan
 
+    # Build deployment script content for the new window
+    $deployScript = @"
+`$ErrorActionPreference = 'Stop'
+Write-Host '[+] Starting VCSA deployment...' -ForegroundColor Cyan
+& "$VCSADeployCLI" install "$tempJsonPath" --accept-eula --no-ssl-certificate-verification
+`$exitCode = `$LASTEXITCODE
+
+if (`$exitCode -eq 0) {
+    Write-Host '[SUCCESS] VCSA deployment completed successfully.' -ForegroundColor Green
+} else {
+    Write-Host '[ERROR] VCSA deployment failed.' -ForegroundColor Red
+}
+exit `$exitCode
+"@
+
+    # Save script to temp .ps1
+    $tempDeployScriptPath = "$env:TEMP\vcsa-deploy-temp.ps1"
+    $deployScript | Set-Content -Path $tempDeployScriptPath -Encoding UTF8
+
+    # Run the script in a hidden process and wait for it to finish
+    $process = Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$tempDeployScriptPath`"" -Wait -PassThru
+    $exitCode = $process.ExitCode
+
+    # Handle result based on exit code
     if ($exitCode -eq 0) {
         Write-Host "[SUCCESS] VCSA deployment completed successfully. Exiting." -ForegroundColor Green
+        Start-Process "https://$VCSAName/ui/"
         Disconnect-VIServer * -Confirm:$false | Out-Null
         exit 0
     } else {
-        Write-Host "[ERROR] VCSA deployment failed." -ForegroundColor Red
+        Write-Host "[ERROR] VCSA deployment failed. Exiting." -ForegroundColor Red
         Disconnect-VIServer * -Confirm:$false | Out-Null
         exit 1
     }
