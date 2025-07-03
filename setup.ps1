@@ -1,7 +1,8 @@
 # ===============================
-# Full VCSA Deployment + Post-Config Script with Licensing
-# PowerShell 5 Compatible Version
+# HuskyNZ VCSA Deployment
 # ===============================
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $ErrorActionPreference = "Stop"
 
@@ -36,14 +37,14 @@ $VCPassword      = $env:VC_PASSWORD
 $NTPServers      = $env:NTP_SERVERS -split ','
 $DeploymentNetwork = $env:DEPLOYMENT_NETWORK
 $Datastore         = $env:DATASTORE
-$ThinDiskMode      = [bool]::Parse($env:THIN_DISK_MODE)
+$ThinDiskMode      = ($env:THIN_DISK_MODE -match '^(1|true)$')
 $DeploymentOption  = $env:DEPLOYMENT_OPTION
 $IPAddress        = $env:IP_ADDRESS
 $DnsServers       = $env:DNS_SERVERS -split ','
 $NetworkPrefix    = $env:NETWORK_PREFIX
 $Gateway          = $env:GATEWAY
 $SsoDomain        = $env:SSO_DOMAIN
-$CeipSettings     = [bool]::Parse($env:CEIP_SETTINGS)
+$CeipSettings     = ($env:CEIP_SETTINGS -match '^(1|true)$')
 $OrgName          = $env:ORG_NAME
 $VmName           = $env:VM_NAME
 
@@ -70,25 +71,46 @@ function Write-Line($text) {
     Write-Host "$sideChar"
 }
 
-Write-Host $topLine -ForegroundColor Cyan
+function Write-Log {
+    param(
+        [string]$Message,
+        [string]$Level = "Info"  # Info, Success, Warning, Error
+    )
+    $isRedirected = [Console]::IsOutputRedirected
+    switch ($Level) {
+        "Success" { $color = "Green" }
+        "Warning" { $color = "Yellow" }
+        "Error"   { $color = "Red" }
+        default   { $color = "Cyan" }
+    }
+    if (-not $isRedirected) {
+        Write-Host $Message -ForegroundColor $color
+    } else {
+        if ($Level -eq "Error") {
+            Write-Error $Message
+        } else {
+            Write-Output $Message
+            [Console]::Out.Flush()
+        }
+    }
+}
+
+Write-Log $topLine "Info"
 Write-Line ($centeredTitle)
 Write-Line ""  # empty line
 
-Write-Line (" VCSA Hostname       : $VCSAName")
-Write-Line (" ESXi Host           : $ESXiHost")
-Write-Line (" Deployment Option   : $DeploymentOption")
-Write-Line (" Network IP          : $IPAddress")
-Write-Line (" Deployment Time     : $currentTime")
+Write-Log (" VCSA Hostname       : $VCSAName") "Info"
+Write-Log (" ESXi Host           : $ESXiHost") "Info"
+Write-Log (" Deployment Option   : $DeploymentOption") "Info"
+Write-Log (" Network IP          : $IPAddress") "Info"
+Write-Log (" Deployment Time     : $currentTime") "Info"
 Write-Line ""  # empty line
 
-Write-Host $bottomLine -ForegroundColor Cyan
-Write-Host ""
-
-
-
+Write-Log $bottomLine "Info"
+Write-Log "" "Info"
 
 if (-not $VCSARootPass) {
-    Write-Host "[ERROR] VCSA root password (VCSA_ROOT_PASSWORD) is not set in the environment or .env file. Exiting." -ForegroundColor Red
+    Write-Log "[ERROR] VCSA root password (VCSA_ROOT_PASSWORD) is not set in the environment or .env file. Exiting." "Error"
     exit 1
 }
 
@@ -147,7 +169,7 @@ $jsonContent = @"
 # Save JSON
 $tempJsonPath = ".\vcenter-deploy.json"
 $jsonContent | Set-Content $tempJsonPath
-Write-Host "[+] Generated JSON config file at $tempJsonPath" -ForegroundColor Green
+Write-Log "[+] Generated JSON config file at $tempJsonPath" "Success"
 
 # PowerCLI install/setup logic (re-added for Get-VM functionality)
 function Ensure-PowerCLI {
@@ -162,7 +184,7 @@ function Ensure-PowerCLI {
         }
     }
 
-    Write-Host "[INFO] Installing or Reinstalling PowerCLI..." -ForegroundColor Yellow
+    Write-Log "[INFO] Installing or Reinstalling PowerCLI..." "Warning"
     # Aggressively uninstall all VMware modules to prevent assembly conflicts
     Get-Module -ListAvailable | Where-Object {$_.Name -like "VMware.*"} | Uninstall-Module -Force -ErrorAction SilentlyContinue
 
@@ -185,31 +207,52 @@ function Ensure-PowerCLI {
 Ensure-PowerCLI
 
 # Connect to ESXi host for VM check
-Write-Host "[+] Connecting to ESXi host $ESXiHost for VM check..." -ForegroundColor Cyan
+Write-Log "[+] Connecting to ESXi host $ESXiHost for VM check..." "Info"
 Connect-VIServer -Server $ESXiHost -User $ESXiUser -Password $ESXiPassword -ErrorAction Stop | Out-Null
 
 # Check for existing VM and proceed with deployment if not found
 $vm = Get-VM -Name $VmName -ErrorAction SilentlyContinue
 
 if ($vm) {
-    Write-Host "[!] VM '$VmName' already exists. Exiting." -ForegroundColor Yellow
-    Start-Process "https://$VCSAName/ui/"
+    Write-Log "[!] VM '$VmName' already exists. Exiting." "Warning"
     Disconnect-VIServer * -Confirm:$false | Out-Null
     exit 0
 } else {
-    Write-Host "[+] VM '$VmName' does not exist. Proceeding with deployment..." -ForegroundColor Cyan
+    Write-Log "[+] VM '$VmName' does not exist. Proceeding with deployment..." "Info"
 
     # Build deployment script content for the new window
     $deployScript = @"
 `$ErrorActionPreference = 'Stop'
-Write-Host '[+] Starting VCSA deployment...' -ForegroundColor Cyan
+function Write-Log {
+    param(
+        [string]`$Message,
+        [string]`$Level = 'Info'
+    )
+    `$isRedirected = [Console]::IsOutputRedirected
+    switch (`$Level) {
+        'Success' { `$color = 'Green' }
+        'Warning' { `$color = 'Yellow' }
+        'Error'   { `$color = 'Red' }
+        default   { `$color = 'Cyan' }
+    }
+    if (-not `$isRedirected) {
+        Write-Host `$Message -ForegroundColor `$color
+    } else {
+        if (`$Level -eq 'Error') {
+            Write-Error `$Message
+        } else {
+            Write-Output `$Message
+            [Console]::Out.Flush()
+        }
+    }
+}
+Write-Log '[+] Starting VCSA deployment...' 'Info'
 & "$VCSADeployCLI" install "$tempJsonPath" --accept-eula --no-ssl-certificate-verification
 `$exitCode = `$LASTEXITCODE
-
 if (`$exitCode -eq 0) {
-    Write-Host '[SUCCESS] VCSA deployment completed successfully.' -ForegroundColor Green
+    Write-Log '[SUCCESS] VCSA deployment completed successfully.' 'Success'
 } else {
-    Write-Host '[ERROR] VCSA deployment failed.' -ForegroundColor Red
+    Write-Log '[ERROR] VCSA deployment failed.' 'Error'
 }
 exit `$exitCode
 "@
@@ -224,12 +267,11 @@ exit `$exitCode
 
     # Handle result based on exit code
     if ($exitCode -eq 0) {
-        Write-Host "[SUCCESS] VCSA deployment completed successfully. Exiting." -ForegroundColor Green
-        Start-Process "https://$VCSAName/ui/"
+        Write-Log "[SUCCESS] VCSA deployment completed successfully. Exiting." "Success"
         Disconnect-VIServer * -Confirm:$false | Out-Null
         exit 0
     } else {
-        Write-Host "[ERROR] VCSA deployment failed. Exiting." -ForegroundColor Red
+        Write-Log "[ERROR] VCSA deployment failed. Exiting." "Error"
         Disconnect-VIServer * -Confirm:$false | Out-Null
         exit 1
     }
