@@ -1,68 +1,113 @@
-<br/>
-<p align="center">
+# HuskyNZ VCenter Deploy
+
+<div align="center">
   <a href="https://github.com/huskynz/vcenter-deploy">
     <img src="https://serv.hnz.li/logo/default.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">HuskyNZ Vcenter Deploy</h3>
-  <p align="center">Reproducible Vcenter Deployments</p>
-  <br>
+  <h3>HuskyNZ VCenter Deploy</h3>
+  <p><strong>Reproducible VMware vCenter Server Appliance Deployment</strong></p>
+</div>
 
-</p>
+<div align="center">
 
-![Contributors](https://img.shields.io/github/contributors/HuskyNZ/vcenter-deploy?color=dark-green) ![Issues](https://img.shields.io/github/issues/HuskyNZ/vcenter-deploy) ![License](https://img.shields.io/github/license/HuskyNZ/vcenter-deploy)
+![Contributors](https://img.shields.io/github/contributors/HuskyNZ/vcenter-deploy?color=dark-green)
+![Issues](https://img.shields.io/github/issues/HuskyNZ/vcenter-deploy)
+![License](https://img.shields.io/github/license/HuskyNZ/vcenter-deploy)
 
-## About The Project
+</div>
 
-**HuskyNZ Vcenter Deploy** is a PowerShell script that automates VMware vCenter Server Appliance (VCSA) deployment. It's designed for users who want to make the deployment of vCenter reproducible. This is extremely useful for labs where you might be tearing down your environment a lot.
+## Overview
+
+Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deploy vCenter consistently across environments with version-controlled configuration. Perfect for labs, testing, and production where you need reliable, repeatable deployments.
 
 ## Quick Start
 
-### 1. Choose Your Deployment Method
+### Prerequisites
+- Windows with PowerShell 5.1+
+- VMware vCenter ISO mounted
+- ESXi host with available resources
+- ESXi admin credentials
 
-#### **A. Command Line**
+### Setup
+1. **Clone and configure:**
+   ```powershell
+   git clone https://github.com/huskynz/vcenter-deploy.git
+   cd vcenter-deploy
+   Copy-Item env.example .env
+   ```
 
-1. Copy the example environment file:
-    ```powershell
-    cp env.example .env
-    ```
-2. Edit `.env` with your deployment settings (use any text editor).
-3. Run the deployment script:
-    ```powershell
-    .\setup.ps1
-    ```
+2. **Edit `.env` with your settings:**
 
-#### **B. GUI**
+    See the Configuration Options below
 
-1. Start the GUI:
-    ```powershell
-    .\setupgui.ps1
-    ```
-2. Enter or load your configuration directly in the app.
-3. Review your settings and click deploy.
+3. **Deploy (CLI recommended):**
+   ```powershell
+   # Recommended: Command line
+   .\setup.ps1
+   
+   # Experimental: GUI (VERY BUGGY)
+   .\setupgui.ps1
+   ```
 
-**Requirements:** VMware vCenter ISO mounted (e.g., `E:\vcsa-cli-installer\win32\vcsa-deploy.exe`), accessible ESXi host, PowerShell 5.1+
+## Configuration Options
+
+### Required Settings
+| Setting | Description |
+|---------|-------------|
+| `VCSA_CLI_PATH` | [driveletter]:\vcsa-cli-installer\win32\vcsa-deploy.exe |
+| `ESXI_HOST` | ESXi host IP/FQDN |
+| `ESXI_USER` | ESXi username |
+| `ESXI_PASSWORD` | ESXi password |
+| `VCSA_HOST` | vCenter FQDN |
+| `VC_PASSWORD` | vCenter SSO password |
+| `VCSA_ROOT_PASSWORD` | vCenter root password |
+| `IP_ADDRESS` | vCenter IP address |
+| `GATEWAY` | Default gateway |
+| `DNS_SERVERS` | DNS servers (comma-separated) |
+| `NETWORK_PREFIX` | Subnet mask (e.g., 24) |
+| `DEPLOYMENT_NETWORK` | ESXi port group |
+| `DATASTORE` | ESXi datastore name |
+| `DEPLOYMENT_OPTION` | vCenter size: `tiny`, `small`, `medium`, `large`, `xlarge` | `small` |
+| `THIN_DISK_MODE` | Thin provisioning: `true`/`false` | `false` |
+| `NTP_SERVERS` | NTP servers (comma-separated) | `pool.ntp.org` |
+| `SSO_DOMAIN` | SSO domain | `vsphere.local` |
+| `CEIP_SETTINGS` | Customer Experience Program: `true`/`false` | `false` |
+
+## Features
+
+- **CLI Interface** (recommended) - Stable, reliable deployment
+- **GUI Interface** (experimental) - Use at your own risk
+- Environment-based configuration
+- Automatic PowerCLI setup
+- ESXi connectivity validation
+- Progress tracking and error handling
+- Reproducible deployments
+
+## Troubleshooting
+
+**PowerCLI issues:** Run as Administrator:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Connection issues:** Verify ESXi host accessibility and credentials
+
+**Path issues:** Ensure vCenter ISO is mounted and `vcsa-deploy.exe` path is correct
+
+**VM exists:** Script automatically checks for existing VMs and exits if found
 
 ## Built With
 
-- Powershell
-- Json
+- PowerShell
+- VMware PowerCLI
+- JSON configuration
 - Git
-- Powercli
-
-## Roadmap
-N/A
-
-## Contributing
-
-N/A
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](https://github.com/huskynz/template/blob/master/LICENSE) for more information.
+MIT License - see [LICENSE](LICENSE) file
 
-## Authors
+## Author
 
-- [HuskyNZ](https://www.husky.nz)
-
-## Acknowledgements
+[HuskyNZ](https://www.husky.nz)
