@@ -1,5 +1,13 @@
 # ===============================
-# HuskyNZ VCSA Deployment
+# HuskyNZ VCSA Deployment Script
+# ===============================
+# 
+# Purpose: Reproducible VMware vCenter Server Appliance Deployment of VMware vCenter Server Appliance
+# Author:  HuskyNZ
+# Version: 1.1
+# 
+# This script automates the deployment of vCenter Server Appliance
+# using the VMware CLI installer with configuration from .env file.
 # ===============================
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -45,12 +53,18 @@ $NetworkPrefix    = $env:NETWORK_PREFIX
 $Gateway          = $env:GATEWAY
 $SsoDomain        = $env:SSO_DOMAIN
 $CeipSettings     = ($env:CEIP_SETTINGS -match '^(1|true)$')
-$OrgName          = $env:ORG_NAME
 $VmName           = $env:VM_NAME
+
+
+# Set local variables that dont need to be in the .env file or set by the user
+$ScriptVersion    = "1.1"
+$ScriptCreatedBy  = "HuskyNZ"
+$ScriptLastUpdatedOn  = "12/07/2025"
+
 
 $currentTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $width = 60
-$title = "$OrgName Vcenter Deployment Script"
+$title = "$ScriptCreatedBy Vcenter Deployment Script"
 
 # Center the title inside the width minus 2 (for frame sides)
 $paddingLeft = [Math]::Floor(($width - 2 - $title.Length) / 2)
@@ -98,7 +112,8 @@ function Write-Log {
 Write-Log $topLine "Info"
 Write-Line ($centeredTitle)
 Write-Line ""  # empty line
-
+Write-Log (" Script Version      : $ScriptVersion") "Info"
+Write-Log (" Script Last Updated : $ScriptLastUpdatedOn") "Info"
 Write-Log (" VCSA Hostname       : $VCSAName") "Info"
 Write-Log (" ESXi Host           : $ESXiHost") "Info"
 Write-Log (" Deployment Option   : $DeploymentOption") "Info"
