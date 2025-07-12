@@ -1,3 +1,7 @@
+# ===============================
+# THIS IS A HIGHLY EXPERIMENTAL GUI THAT MAY BREAK
+# ===============================
+
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 Add-Type -AssemblyName System.Windows.Forms

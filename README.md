@@ -53,21 +53,21 @@ Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deplo
 ## Configuration Options
 
 ### Required Settings
-| Setting | Description |
-|---------|-------------|
-| `VCSA_CLI_PATH` | [driveletter]:\vcsa-cli-installer\win32\vcsa-deploy.exe |
-| `ESXI_HOST` | ESXi host IP/FQDN |
-| `ESXI_USER` | ESXi username |
-| `ESXI_PASSWORD` | ESXi password |
-| `VCSA_HOST` | vCenter FQDN |
-| `VC_PASSWORD` | vCenter SSO password |
-| `VCSA_ROOT_PASSWORD` | vCenter root password |
-| `IP_ADDRESS` | vCenter IP address |
-| `GATEWAY` | Default gateway |
-| `DNS_SERVERS` | DNS servers (comma-separated) |
-| `NETWORK_PREFIX` | Subnet mask (e.g., 24) |
-| `DEPLOYMENT_NETWORK` | ESXi port group |
-| `DATASTORE` | ESXi datastore name |
+| Setting | Description | Default in .env.example |
+|---------|-------------|-------------------------|
+| `VCSA_CLI_PATH` | Path to vcsa-deploy | `[driveletter]:\vcsa-cli-installer\win32\vcsa-deploy.exe` |
+| `ESXI_HOST` | ESXi host IP/FQDN | None |
+| `ESXI_USER` | ESXi username | None |
+| `ESXI_PASSWORD` | ESXi password | None | 
+| `VCSA_HOST` | vCenter FQDN | None |
+| `VC_PASSWORD` | vCenter SSO password | None |
+| `VCSA_ROOT_PASSWORD` | vCenter root password | None |
+| `IP_ADDRESS` | vCenter IP address | None |
+| `GATEWAY` | Default gateway | None |
+| `DNS_SERVERS` | DNS servers (comma-separated) | None |
+| `NETWORK_PREFIX` | Subnet mask (e.g., 24) | None |
+| `DEPLOYMENT_NETWORK` | ESXi port group | `VM Network` |
+| `DATASTORE` | ESXi datastore name | None |
 | `DEPLOYMENT_OPTION` | vCenter size: `tiny`, `small`, `medium`, `large`, `xlarge` | `small` |
 | `THIN_DISK_MODE` | Thin provisioning: `true`/`false` | `false` |
 | `NTP_SERVERS` | NTP servers (comma-separated) | `pool.ntp.org` |
