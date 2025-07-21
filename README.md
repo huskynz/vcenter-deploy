@@ -5,7 +5,7 @@
     <img src="https://serv.hnz.li/logo/default.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3>HuskyNZ vCenter Deploy</h3>
+  <center><h3>HuskyNZ vCenter Deploy</h3></center>
   <p><strong>Automated, Reliable VMware vCenter Server Appliance Deployment</strong></p>
 </div>
 
@@ -80,7 +80,6 @@ Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deplo
      - Generate a JSON config for the vCenter CLI installer
      - Run the deployment and show progress with color-coded logs
      - Disconnect from ESXi and report success or errors
-     ```
 
 
 ## Configuration Options
