@@ -1,5 +1,3 @@
-# HuskyNZ vCenter Deploy
-
 <div align="center">
   <a href="https://github.com/huskynz/vcenter-deploy">
     <img src="https://serv.hnz.li/logo/default.png" alt="Logo" width="80" height="80">
