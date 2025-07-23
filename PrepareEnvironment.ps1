@@ -3,7 +3,7 @@
 # ===============================
 # Interactively sets up .env from env.example with user-friendly prompts, descriptions, masking, summary, section grouping, progress, and validation.
 
-Import-Module .\modules\metadata.psm1
+Import-Module .\modules\metadata\metadata.psm1
 
 $meta = Get-Metadata
 $envExample = if ($meta.envExample) { $meta.envExample } else { "env.example" }

@@ -1,4 +1,4 @@
-Import-Module .\modules\metadata.psm1
+Import-Module ..\metadata\metadata.psm1
 
 $meta = Get-Metadata
 

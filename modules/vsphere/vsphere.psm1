@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot 'logging.psm1')
+. (Join-Path $PSScriptRoot '..\logging\logging.psm1')
 
 function Connect-ESXiHost {
     [CmdletBinding()]
