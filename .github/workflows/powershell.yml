@@ -39,6 +39,7 @@ jobs:
           path: .\
           recurse: true
           # Include your own basic security rules. Removing this option will run all the rules
+          includeDefaultRules: true 
           includeRule: '"PSAvoidGlobalAliases", "PSAvoidUsingConvertToSecureStringWithPlainText"'
           output: results.sarif
 
