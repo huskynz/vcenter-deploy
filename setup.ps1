@@ -4,7 +4,7 @@
 #
 # Purpose: Reproducible VMware vCenter Server Appliance Deployment
 # Author:  HuskyNZ
-# Version: 3.0
+# Version: 4.0
 #
 # This script automates the deployment of vCenter Server Appliance
 # using the VMware CLI installer with configuration from .env file.
@@ -33,6 +33,7 @@ Import-Module .\modules\vsphere\vsphere.psm1
 Import-Module .\modules\deployment\deployment.psm1
 Import-Module .\modules\metadata\metadata.psm1
 Import-Module .\modules\envcheck\envcheck.psm1
+Import-Module .\modules\genaratejson\genaratejson.psm1
 
 $env:PROJECT_ROOT = $ScriptRoot
 
@@ -48,12 +49,8 @@ $meta = Get-Metadata
 # Show banner
 Show-Banner -ScriptVersion $meta.ScriptVersion -ScriptLastUpdatedOn $meta.ScriptLastUpdatedOn -VCSAName $config.VCSAName -ESXiHost $config.ESXiHost -DeploymentOption $config.DeploymentOption -IPAddress $config.IPAddress
 
-# Generate JSON config
-if (Test-Path ".\vcenter-deploy.json") {
-    Remove-Item ".\vcenter-deploy.json" -Force
-}
-$tempJsonPath = New-VcenterJsonConfig -config $config
-Write-Log "[+] Generated JSON config file at $tempJsonPath" "Success"
+Write-Json
+
 
 # Connect to ESXi and check for existing VM
 Connect-ESXiHost -ESXiHost $config.ESXiHost -ESXiUser $config.ESXiUser -ESXiPassword $config.ESXiPassword

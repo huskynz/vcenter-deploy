@@ -1,9 +1,9 @@
 @{
-    RootModule = 'help.psm1'
+    RootModule = 'genaratejson.psm1'
     ModuleVersion = '4.0'
     GUID = '$(New-Guid)'
     Author = 'HuskyNZ'
-    Description = 'Help module for vcenter-deploy.'
+    Description = 'Genarate the dynamic json needed for VCSAdeploy .exe'
     PowerShellVersion = '5.1'
     FunctionsToExport = '*'
     CmdletsToExport = '*'
