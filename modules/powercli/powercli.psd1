@@ -1,6 +1,6 @@
 @{
     RootModule = 'powercli.psm1'
-    ModuleVersion = '3.0.0'
+    ModuleVersion = '4.0'
     GUID = '$(New-Guid)'
     Author = 'HuskyNZ'
     Description = 'PowerCLI module for vcenter-deploy.'
