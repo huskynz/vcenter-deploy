@@ -10,63 +10,43 @@
 # using the VMware CLI installer with configuration from .env file.
 # ===============================
 
+
+$ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ErrorActionPreference = "Stop"
 
+
 # Show help if -Help or --help is passed
 if ($args -contains '-Help' -or $args -contains '--help' -or $args -contains '-?' -or $args -contains '--?') {
-    Import-Module .\modules\help.psm1
+    Import-Module .\modules\help\help.psm1
     Show-Help
     exit 0
 }
 
 # Import modules
-Import-Module .\modules\logging.psm1
-Import-Module .\modules\powercli.psm1
-Import-Module .\modules\environment.psm1
-Import-Module .\modules\config.psm1
-Import-Module .\modules\vsphere.psm1
-Import-Module .\modules\deployment.psm1
-Import-Module .\modules\metadata.psm1
+Import-Module .\modules\logging\logging.psm1
+Import-Module .\modules\powercli\powercli.psm1
+Import-Module .\modules\environment\environment.psm1
+Import-Module .\modules\config\config.psm1
+Import-Module .\modules\vsphere\vsphere.psm1
+Import-Module .\modules\deployment\deployment.psm1
+Import-Module .\modules\metadata\metadata.psm1
+Import-Module .\modules\envcheck\envcheck.psm1
 
-if (-not (Get-Command Invoke-PcliCheck -ErrorAction SilentlyContinue)) {
-    Write-Error "Invoke-PcliCheck function is not available after importing the module."
-    exit 1
-}
-Invoke-PcliCheck
+$env:PROJECT_ROOT = $ScriptRoot
 
 
 # Load environment variables
 $config = Get-EnvironmentVariables
 
 # Validate required environment variables
-$requiredVariables = @(
-    'VCSADeployCLI',
-    'ESXiHost',
-    'ESXiUser',
-    'ESXiPassword',
-    'VCSAName',
-    'VCPassword',
-    'VCSARootPass',
-    'IPAddress',
-    'Gateway',
-    'DnsServers',
-    'NetworkPrefix',
-    'Datastore',
-    'VmName'
-)
+Import-EnvCheck
 
-foreach ($variable in $requiredVariables) {
-    if (-not $config[$variable]) {
-        Write-Log "[ERROR] Required environment variable '$variable' is not set in the .env file. Exiting." "Error"
-        exit 1
-    }
-}
 
 $meta = Get-Metadata
-
 # Show banner
-Show-Banner -ScriptVersion $($meta.ScriptVersion) -ScriptLastUpdatedOn $($meta.ScriptLastUpdatedOn) -VCSAName $config.VCSAName -ESXiHost $config.ESXiHost -DeploymentOption $config.DeploymentOption -IPAddress $config.IPAddress
+Show-Banner -ScriptVersion $meta.ScriptVersion -ScriptLastUpdatedOn $meta.ScriptLastUpdatedOn -VCSAName $config.VCSAName -ESXiHost $config.ESXiHost -DeploymentOption $config.DeploymentOption -IPAddress $config.IPAddress
 
 # Generate JSON config
 if (Test-Path ".\vcenter-deploy.json") {

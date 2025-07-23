@@ -35,7 +35,7 @@ function Show-Banner {
 
     if (-not (Get-Command Get-Metadata -ErrorAction SilentlyContinue)) {
         try {
-            Import-Module "$PSScriptRoot\metadata.psm1" -Force
+            Import-Module "..\metadata\metadata.psm1" -Force
         } catch {
             Write-Log "[ERROR] Could not import metadata.psm1. Banner will be incomplete." "Error"
             return
@@ -66,8 +66,8 @@ function Show-Banner {
     Write-Log $topLine "Info"
     Write-Line ($centeredTitle)
     Write-Line ""
-    Write-Log (" Script Version      : $($meta.ScriptVersion)") "Info"
-    Write-Log (" Script Last Updated : $($meta.ScriptLastUpdatedOn)") "Info"
+    Write-Log (" Script Version      : $ScriptVersion") "Info"
+    Write-Log (" Script Last Updated : $ScriptLastUpdatedOn") "Info"
     Write-Log (" VCSA Hostname       : $VCSAName") "Info"
     Write-Log (" ESXi Host           : $ESXiHost") "Info"
     Write-Log (" Deployment Option   : $DeploymentOption") "Info"
