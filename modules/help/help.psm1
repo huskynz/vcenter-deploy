@@ -8,7 +8,7 @@ function Show-Help {
 
     $helpText = @"
 ==============================
-$($meta.ScriptCreatedBy) VCenter Deploy
+    $($meta.ScriptCreatedBy) VCenter Deploy
 ==============================
 
 What it does:
@@ -19,6 +19,28 @@ USAGE:
     .\setup.ps1
 
 REQUIRED SETUP:
+
+Option A - **Create your environment file interactively (recommended):**
+   - Run the guided setup:
+     ```powershell
+     .\PrepareEnvironment.ps1
+     ```
+   - This script will:
+     - Prompt you for each required setting (with descriptions and validation)
+     - Mask sensitive input (like passwords)
+     - Group related settings for clarity
+     - Show a summary before saving
+     - Write a complete `.env` file ready for deployment
+   - _Tip: You can abort at any prompt by typing `:q`._
+
+Option B - **(Alternative) Edit `.env` manually:**
+   - Copy the example environment file:
+     ```powershell
+     Copy-Item env.example .env
+     ```
+   - Open `.env` in your preferred text editor (e.g., VS Code, Notepad++)
+   - Fill in all required fields. Refer to the Configuration Options section below for descriptions and defaults.
+   - Double-check paths (especially `VCSA_CLI_PATH`) and credentials for accuracy.
     1. Copy env.example to .env and edit with your environment details.
     2. Ensure the vCenter ISO is mounted and vcsa-deploy.exe path is correct.
 

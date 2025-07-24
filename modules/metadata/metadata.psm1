@@ -2,7 +2,7 @@ function Get-Metadata {
     return @{
         ScriptVersion = "4.0"
         ScriptCreatedBy = "HuskyNZ"
-        ScriptLastUpdatedOn = "22/07/2025"
+        ScriptLastUpdatedOn = "24/07/2025"
         envExample = "env.example"
         envFile = ".env"
     }

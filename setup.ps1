@@ -18,7 +18,7 @@ $ErrorActionPreference = "Stop"
 
 
 # Show help if -Help or --help is passed
-if ($args -contains '-Help' -or $args -contains '--help' -or $args -contains '-?' -or $args -contains '--?') {
+if ($args -contains '-Help' -or $args -contains '--help' -or $args -contains '-?' -or $args -contains '--?' -or $args -contains ' ' -or $args -contains '') {
     Import-Module .\modules\help\help.psm1
     Show-Help
     exit 0

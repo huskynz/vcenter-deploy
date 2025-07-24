@@ -46,7 +46,13 @@ exit `$exitCode
     $tempDeployScriptPath = "$env:TEMP\vcsa-deploy-temp.ps1"
     $deployScript | Set-Content -Path $tempDeployScriptPath -Encoding UTF8
 
-    $process = Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$tempDeployScriptPath`"" -Wait -PassThru
+    $process = Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$tempDeployScriptPath`"" -Wait -PassThru -ArgumentList "-ExecutionPolicy Bypass -File `"$tempDeployScriptPath`"" -Wait -PassThru -RedirectStandardError $true
+    
+      # Add cleanup
+    if (Test-Path $tempDeployScriptPath) {
+        Remove-Item $tempDeployScriptPath -Force
+    }
+    
     return $process.ExitCode
 }
 
