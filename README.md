@@ -22,10 +22,14 @@ Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deplo
 ## Quick Start
 
 ### Prerequisites
-- Windows with PowerShell 5.1+ or PowerShell 7+
-- VMware vCenter ISO mounted
-- ESXi host with available resources
+- Windows with at least PowerShell 5.1+
+- VMware vCenter ISO mounted and or extracted
+- ESXi host with available resources (Virt net,Datastore etc)
 - ESXi admin credentials
+- Ensure you enabled running scripts  below is a example allowing local scripts to be run  
+  ```powershell
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
 
 ### Setup
 
@@ -39,7 +43,7 @@ Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deplo
 
 2. **Ensure prerequisites are met:**
    - Make sure you have:
-     - Windows with PowerShell 5.1+ or PowerShell 7+
+     - Windows with at least PowerShell 5.1+
      - The VMware vCenter ISO mounted (so you can reference `vcsa-deploy.exe`)
      - Network access to your ESXi host
      - ESXi admin credentials
@@ -55,7 +59,6 @@ Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deplo
      - Group related settings for clarity
      - Show a summary before saving
      - Write a complete `.env` file ready for deployment
-   - _Tip: You can abort at any prompt by typing `:q`._
 
 3b. **(Alternative) Edit `.env` manually:**
    - Copy the example environment file:
@@ -108,7 +111,6 @@ All configuration is managed via the `.env` file. You can generate this interact
 
 ## Features
 
-- **Modular PowerShell codebase** for maintainability and extensibility
 - **Interactive .env setup** with validation and descriptions (`PrepareEnvironment.ps1`)
 - **Automated PowerCLI installation and configuration**
 - **ESXi connectivity validation** and VM existence checks
@@ -122,16 +124,7 @@ All configuration is managed via the `.env` file. You can generate this interact
 
 - Run `.\setup.ps1` to deploy vCenter using your `.env` configuration.
 - Use `.\PrepareEnvironment.ps1` to interactively create or update your `.env` file.
-- For help, run:
-  ```powershell
-  .\setup.ps1 -Help
-  ```
 
 ## Troubleshooting
-
-- **PowerCLI issues:** Run as Administrator:
-  ```powershell
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-  ```
 - **Connection issues:** Verify ESXi host accessibility and credentials
-- **Path issues:** Ensure vCenter ISO is mounted and `vcsa-deploy.exe`
+- **Path issues:** Ensure your path too `vcsa-deploy.exe` is right, aswell as ensure you include vcsa-deploy.exe in the path eg - [driveletter]:\vcsa-cli-installer\win32\vcsa-deploy.exe
