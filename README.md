@@ -112,6 +112,7 @@ All configuration is managed via the `.env` file. You can generate this interact
 ## Features
 
 - **Interactive .env setup** with validation and descriptions (`PrepareEnvironment.ps1`)
+- **Windows Forms GUI wrapper** for user-friendly configuration and deployment
 - **Automated PowerCLI installation and configuration**
 - **ESXi connectivity validation** and VM existence checks
 - **Version-controlled, environment-based configuration**
@@ -121,6 +122,35 @@ All configuration is managed via the `.env` file. You can generate this interact
 - **Reproducible, idempotent deployments**
 
 ## Usage
+
+### GUI Application (Recommended for Windows Users)
+
+For a user-friendly graphical interface:
+
+1. **Navigate to the GUI directory:**
+   ```powershell
+   cd GUI
+   ```
+
+2. **Build and run the GUI application:**
+   ```powershell
+   .\Build-GUI.ps1 -Run
+   ```
+
+   Or to create a standalone executable:
+   ```powershell
+   .\Build-GUI.ps1 -Publish
+   ```
+
+3. **Use the GUI to:**
+   - Configure all deployment settings with real-time validation
+   - Save/load configuration files
+   - Monitor deployment progress
+   - Get immediate feedback on configuration issues
+
+See [GUI/README.md](GUI/README.md) for detailed GUI documentation.
+
+### Command Line (Traditional Method)
 
 - Run `.\setup.ps1` to deploy vCenter using your `.env` configuration.
 - Use `.\PrepareEnvironment.ps1` to interactively create or update your `.env` file.
