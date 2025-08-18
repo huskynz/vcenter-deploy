@@ -19,6 +19,27 @@
 
 Reproducible VMware vCenter Server Appliance (VCSA) deployment automation. Deploy vCenter consistently across environments with version-controlled configuration. Perfect for labs, testing, and production where you need reliable, repeatable deployments.
 
+**✨ NEW: Windows GUI Available!** - Use the included Windows Forms GUI for a user-friendly interface. See `VCenterDeployGUI/` folder for the graphical interface option.
+
+## Deployment Options
+
+Choose the method that works best for you:
+
+### 🖥️ Windows GUI (New!)
+- **User-friendly interface** with tabbed layout
+- **Real-time validation** and visual feedback  
+- **Point-and-click configuration** management
+- **Built-in progress tracking** and logging
+- **Perfect for**: Users who prefer graphical interfaces
+
+📂 See `VCenterDeployGUI/` folder and `VCenterDeployGUI/INSTALL.md` for setup instructions.
+
+### 💻 Command Line (Original)
+- **PowerShell-based** automation scripts
+- **Interactive configuration** wizard
+- **Full scriptable** for automation
+- **Perfect for**: Automation, CI/CD, advanced users
+
 ## Quick Start
 
 ### Prerequisites
@@ -111,6 +132,16 @@ All configuration is managed via the `.env` file. You can generate this interact
 
 ## Features
 
+### 🖥️ Windows GUI Features
+- **Professional Windows Forms interface** with tabbed layout for logical grouping
+- **Real-time field validation** with visual feedback (IP addresses, paths, required fields)
+- **Configuration management** - load/save .env files, import from templates
+- **PowerShell integration** - execute deployment scripts with progress tracking
+- **Color-coded logging** and comprehensive status messages
+- **Tooltips and help** for all configuration options
+- **Professional styling** consistent with Windows standards
+
+### 💻 Command Line Features  
 - **Interactive .env setup** with validation and descriptions (`PrepareEnvironment.ps1`)
 - **Automated PowerCLI installation and configuration**
 - **ESXi connectivity validation** and VM existence checks
@@ -122,6 +153,12 @@ All configuration is managed via the `.env` file. You can generate this interact
 
 ## Usage
 
+### Windows GUI
+- Navigate to `VCenterDeployGUI/` folder and follow `INSTALL.md` instructions
+- Double-click `run-gui.bat` for automatic setup on Windows
+- Use the tabbed interface to configure and deploy vCenter
+
+### Command Line
 - Run `.\setup.ps1` to deploy vCenter using your `.env` configuration.
 - Use `.\PrepareEnvironment.ps1` to interactively create or update your `.env` file.
 

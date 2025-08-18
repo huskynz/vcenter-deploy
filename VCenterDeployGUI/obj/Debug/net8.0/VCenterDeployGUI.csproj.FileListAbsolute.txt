@@ -1,0 +1,15 @@
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.GeneratedMSBuildEditorConfig.editorconfig
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.AssemblyInfoInputs.cache
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.AssemblyInfo.cs
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.csproj.CoreCompileInputs.cache
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.sourcelink.json
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/bin/Debug/net8.0/VCenterDeployGUI
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/bin/Debug/net8.0/VCenterDeployGUI.deps.json
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/bin/Debug/net8.0/VCenterDeployGUI.runtimeconfig.json
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/bin/Debug/net8.0/VCenterDeployGUI.dll
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/bin/Debug/net8.0/VCenterDeployGUI.pdb
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.dll
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/refint/VCenterDeployGUI.dll
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.pdb
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/VCenterDeployGUI.genruntimeconfig.cache
+/home/runner/work/vcenter-deploy/vcenter-deploy/VCenterDeployGUI/obj/Debug/net8.0/ref/VCenterDeployGUI.dll
