@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.deps.json
+*.runtimeconfig.json
+
+# IDE files
+.vs/
+.vscode/
+*.suo
+*.user
+
+# Temporary files
+*.tmp
+*.temp
+logs/
