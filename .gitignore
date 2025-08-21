@@ -22,4 +22,12 @@ Thumbs.db
 # Ignore backup files
 *~
 *.bak
+
+# Ignore .NET build artifacts
+GUI/VCenterDeployGUI/bin/
+GUI/VCenterDeployGUI/obj/
+GUI/VCenterDeployGUI/publish/
+*.user
+*.suo
+
 .cursorignore
