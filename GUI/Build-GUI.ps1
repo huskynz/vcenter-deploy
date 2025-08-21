@@ -73,11 +73,11 @@ function Build-Application {
     Push-Location $projectPath
     try {
         Write-Host "Restoring dependencies..." -ForegroundColor Yellow
-        & dotnet restore
+        & dotnet restore | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "Failed to restore dependencies" }
         
         Write-Host "Building application..." -ForegroundColor Yellow
-        & dotnet build -c Release
+        & dotnet build -c Release | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "Build failed" }
         
         Write-Host "[✓] Build completed successfully" -ForegroundColor Green
@@ -97,7 +97,7 @@ function Publish-Application {
     Push-Location $projectPath
     try {
         Write-Host "Creating self-contained executable..." -ForegroundColor Yellow
-        & dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+        & dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "Publish failed" }
         
         $publishPath = Join-Path $projectPath "bin\Release\net8.0-windows\win-x64\publish"
