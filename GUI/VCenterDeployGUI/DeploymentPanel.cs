@@ -30,8 +30,9 @@ namespace VCenterDeployGUI
             SuspendLayout();
             
             Name = "DeploymentPanel";
-            Size = new Size(800, 600);
-            BackColor = SystemColors.Control;
+            Size = new Size(1200, 650);
+            BackColor = Color.FromArgb(248, 249, 250);
+            Font = new Font("Segoe UI", 9F);
             
             ResumeLayout(false);
         }
@@ -82,47 +83,79 @@ namespace VCenterDeployGUI
         {
             var panel = new Panel
             {
-                Height = 40,
-                Dock = DockStyle.Top
+                Height = 60,
+                Dock = DockStyle.Top,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0, 10, 0, 10)
+            };
+
+            // Header label
+            var headerLabel = new Label
+            {
+                Text = "🚀 Deployment Actions",
+                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(33, 37, 41),
+                AutoSize = true,
+                Location = new Point(0, 0)
             };
 
             validateButton = new Button
             {
-                Text = "Validate Environment",
-                Size = new Size(140, 30),
-                Location = new Point(0, 5),
-                UseVisualStyleBackColor = true
+                Text = "🔍 Validate Environment",
+                Size = new Size(160, 36),
+                Location = new Point(0, 25),
+                Font = new Font("Segoe UI", 9F),
+                BackColor = Color.FromArgb(40, 167, 69),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                UseVisualStyleBackColor = false
             };
+            validateButton.FlatAppearance.BorderSize = 0;
 
             deployButton = new Button
             {
-                Text = "Start Deployment",
-                Size = new Size(120, 30),
-                Location = new Point(150, 5),
-                UseVisualStyleBackColor = true,
+                Text = "🚀 Start Deployment",
+                Size = new Size(150, 36),
+                Location = new Point(170, 25),
+                Font = new Font("Segoe UI", 9F),
+                BackColor = Color.FromArgb(0, 123, 255),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                UseVisualStyleBackColor = false,
                 Enabled = false
             };
+            deployButton.FlatAppearance.BorderSize = 0;
 
             stopButton = new Button
             {
-                Text = "Stop",
-                Size = new Size(60, 30),
-                Location = new Point(280, 5),
-                UseVisualStyleBackColor = true,
+                Text = "⏹️ Stop",
+                Size = new Size(80, 36),
+                Location = new Point(330, 25),
+                Font = new Font("Segoe UI", 9F),
+                BackColor = Color.FromArgb(220, 53, 69),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                UseVisualStyleBackColor = false,
                 Enabled = false
             };
+            stopButton.FlatAppearance.BorderSize = 0;
 
             var clearButton = new Button
             {
-                Text = "Clear Output",
-                Size = new Size(90, 30),
-                Location = new Point(350, 5),
-                UseVisualStyleBackColor = true
+                Text = "🗑️ Clear Output",
+                Size = new Size(120, 36),
+                Location = new Point(420, 25),
+                Font = new Font("Segoe UI", 9F),
+                BackColor = Color.FromArgb(108, 117, 125),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                UseVisualStyleBackColor = false
             };
+            clearButton.FlatAppearance.BorderSize = 0;
 
             clearButton.Click += (s, e) => outputTextBox?.Clear();
 
-            panel.Controls.AddRange(new Control[] { validateButton, deployButton, stopButton, clearButton });
+            panel.Controls.AddRange(new Control[] { headerLabel, validateButton, deployButton, stopButton, clearButton });
             return panel;
         }
 
@@ -130,41 +163,57 @@ namespace VCenterDeployGUI
         {
             var panel = new Panel
             {
-                Height = 35,
-                Dock = DockStyle.Top
+                Height = 50,
+                Dock = DockStyle.Top,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0, 8, 0, 8)
             };
 
             var label = new Label
             {
-                Text = "Working Directory:",
-                Size = new Size(120, 20),
-                Location = new Point(0, 8),
-                TextAlign = ContentAlignment.MiddleLeft
+                Text = "📁 Working Directory:",
+                Size = new Size(140, 22),
+                Location = new Point(0, 12),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(52, 58, 64)
             };
 
             useCurrentDirCheckBox = new CheckBox
             {
                 Text = "Use current directory",
-                Size = new Size(150, 20),
-                Location = new Point(125, 8),
-                Checked = true
+                Size = new Size(160, 22),
+                Location = new Point(145, 12),
+                Checked = true,
+                Font = new Font("Segoe UI", 9F),
+                ForeColor = Color.FromArgb(52, 58, 64),
+                BackColor = Color.Transparent
             };
 
             workingDirTextBox = new TextBox
             {
-                Size = new Size(300, 23),
-                Location = new Point(280, 6),
+                Size = new Size(320, 26),
+                Location = new Point(310, 10),
                 Text = GetDefaultWorkingDirectory(),
-                Enabled = false
+                Enabled = false,
+                Font = new Font("Segoe UI", 9F),
+                BackColor = Color.FromArgb(233, 236, 239),
+                BorderStyle = BorderStyle.FixedSingle
             };
 
             browseWorkingDirButton = new Button
             {
                 Text = "Browse...",
-                Size = new Size(70, 23),
-                Location = new Point(590, 6),
-                Enabled = false
+                Size = new Size(80, 26),
+                Location = new Point(640, 10),
+                Enabled = false,
+                Font = new Font("Segoe UI", 8.5F),
+                BackColor = Color.FromArgb(108, 117, 125),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                UseVisualStyleBackColor = false
             };
+            browseWorkingDirButton.FlatAppearance.BorderSize = 0;
 
             useCurrentDirCheckBox.CheckedChanged += (s, e) =>
             {
@@ -175,6 +224,10 @@ namespace VCenterDeployGUI
                 if (useCurrentDir)
                 {
                     workingDirTextBox.Text = GetDefaultWorkingDirectory();
+                }
+                else
+                {
+                    workingDirTextBox.BackColor = Color.White;
                 }
             };
 
@@ -200,16 +253,22 @@ namespace VCenterDeployGUI
         {
             var panel = new Panel
             {
-                Height = 25,
-                Dock = DockStyle.Top
+                Height = 35,
+                Dock = DockStyle.Top,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0, 5, 0, 5)
             };
 
             statusLabel = new Label
             {
-                Text = "Ready to validate or deploy",
+                Text = "💡 Ready to validate or deploy",
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Font = new Font(Font.FontFamily, Font.Size, FontStyle.Bold)
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(40, 167, 69),
+                BackColor = Color.FromArgb(212, 237, 218),
+                BorderStyle = BorderStyle.FixedSingle,
+                Padding = new Padding(10, 8, 10, 8)
             };
 
             panel.Controls.Add(statusLabel);
@@ -220,14 +279,18 @@ namespace VCenterDeployGUI
         {
             var panel = new Panel
             {
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                BackColor = Color.Transparent
             };
 
             var groupBox = new GroupBox
             {
-                Text = "Output",
+                Text = "📄 Output Console",
                 Dock = DockStyle.Fill,
-                Padding = new Padding(5)
+                Padding = new Padding(8),
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(52, 58, 64),
+                BackColor = Color.Transparent
             };
 
             outputTextBox = new TextBox
@@ -235,10 +298,12 @@ namespace VCenterDeployGUI
                 Multiline = true,
                 ScrollBars = ScrollBars.Both,
                 Dock = DockStyle.Fill,
-                Font = new Font("Consolas", 9),
-                BackColor = Color.Black,
-                ForeColor = Color.LimeGreen,
-                ReadOnly = true
+                Font = new Font("Consolas", 9.5F),
+                BackColor = Color.FromArgb(30, 30, 30),
+                ForeColor = Color.FromArgb(204, 204, 204),
+                ReadOnly = true,
+                BorderStyle = BorderStyle.None,
+                Text = "Ready to execute PowerShell scripts...\r\n"
             };
 
             groupBox.Controls.Add(outputTextBox);
@@ -250,15 +315,19 @@ namespace VCenterDeployGUI
         {
             var panel = new Panel
             {
-                Height = 30,
-                Dock = DockStyle.Bottom
+                Height = 40,
+                Dock = DockStyle.Bottom,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0, 8, 0, 8)
             };
 
             progressBar = new ProgressBar
             {
                 Dock = DockStyle.Fill,
                 Style = ProgressBarStyle.Continuous,
-                Margin = new Padding(0, 5, 0, 0)
+                Height = 24,
+                BackColor = Color.FromArgb(233, 236, 239),
+                ForeColor = Color.FromArgb(0, 123, 255)
             };
 
             panel.Controls.Add(progressBar);

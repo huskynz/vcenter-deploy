@@ -22,8 +22,9 @@ namespace VCenterDeployGUI
             SuspendLayout();
             
             Name = "ConfigurationPanel";
-            Size = new Size(800, 600);
-            BackColor = SystemColors.Control;
+            Size = new Size(1200, 650);
+            BackColor = Color.FromArgb(248, 249, 250);
+            Font = new Font("Segoe UI", 9F);
             
             ResumeLayout(false);
         }
@@ -34,19 +35,23 @@ namespace VCenterDeployGUI
             
             tabControl = new TabControl
             {
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 9F),
+                ItemSize = new Size(120, 32),
+                Padding = new Point(8, 6),
+                Appearance = TabAppearance.Normal
             };
 
             var configFields = envManager.GetConfigurationFields();
             
-            // Group fields into logical tabs
+            // Group fields into logical tabs with icons
             var tabGroups = new Dictionary<string, List<string>>
             {
-                ["General"] = new() { "VM_NAME", "VCSA_CLI_PATH", "VCSA_HOST" },
-                ["Credentials"] = new() { "VC_PASSWORD", "VCSA_ROOT_PASSWORD", "ESXI_HOST", "ESXI_USER", "ESXI_PASSWORD" },
-                ["Network"] = new() { "IP_ADDRESS", "DNS_SERVERS", "NETWORK_PREFIX", "GATEWAY", "DEPLOYMENT_NETWORK" },
-                ["Deployment"] = new() { "DATASTORE", "THIN_DISK_MODE", "DEPLOYMENT_OPTION", "NTP_SERVERS" },
-                ["Advanced"] = new() { "SSO_DOMAIN", "CEIP_SETTINGS" }
+                ["⚙️ General"] = new() { "VM_NAME", "VCSA_CLI_PATH", "VCSA_HOST" },
+                ["🔐 Credentials"] = new() { "VC_PASSWORD", "VCSA_ROOT_PASSWORD", "ESXI_HOST", "ESXI_USER", "ESXI_PASSWORD" },
+                ["🌐 Network"] = new() { "IP_ADDRESS", "DNS_SERVERS", "NETWORK_PREFIX", "GATEWAY", "DEPLOYMENT_NETWORK" },
+                ["🚀 Deployment"] = new() { "DATASTORE", "THIN_DISK_MODE", "DEPLOYMENT_OPTION", "NTP_SERVERS" },
+                ["🔧 Advanced"] = new() { "SSO_DOMAIN", "CEIP_SETTINGS" }
             };
 
             foreach (var tabGroup in tabGroups)
@@ -54,24 +59,39 @@ namespace VCenterDeployGUI
                 var tabPage = new TabPage(tabGroup.Key)
                 {
                     UseVisualStyleBackColor = true,
-                    Padding = new Padding(10)
+                    Padding = new Padding(20),
+                    BackColor = Color.FromArgb(252, 253, 254),
+                    Font = new Font("Segoe UI", 9F)
                 };
 
                 var scrollPanel = new Panel
                 {
                     Dock = DockStyle.Fill,
-                    AutoScroll = true
+                    AutoScroll = true,
+                    BackColor = Color.Transparent
                 };
 
+                var headerLabel = new Label
+                {
+                    Text = tabGroup.Key.Replace("🔧", "").Replace("🚀", "").Replace("🌐", "").Replace("🔐", "").Replace("⚙️", "").Trim() + " Configuration",
+                    Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+                    ForeColor = Color.FromArgb(33, 37, 41),
+                    AutoSize = true,
+                    Margin = new Padding(0, 0, 0, 20),
+                    Dock = DockStyle.Top
+                };
+                
                 var innerPanel = new TableLayoutPanel
                 {
                     ColumnCount = 2,
                     AutoSize = true,
                     AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    Dock = DockStyle.Top
+                    Dock = DockStyle.Top,
+                    BackColor = Color.Transparent,
+                    Padding = new Padding(0, 40, 0, 20)
                 };
 
-                innerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                innerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200));
                 innerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
                 var row = 0;
@@ -85,6 +105,7 @@ namespace VCenterDeployGUI
                 }
 
                 scrollPanel.Controls.Add(innerPanel);
+                scrollPanel.Controls.Add(headerLabel);
                 tabPage.Controls.Add(scrollPanel);
                 tabControl.TabPages.Add(tabPage);
             }
@@ -97,20 +118,21 @@ namespace VCenterDeployGUI
             parent.RowCount = Math.Max(parent.RowCount, row + 2);
             parent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-            // Label
+            // Label with improved styling
             var label = new Label
             {
                 Text = field.DisplayName + (field.IsRequired ? " *" : ""),
-                Font = new Font(Font.FontFamily, Font.Size, field.IsRequired ? FontStyle.Bold : FontStyle.Regular),
-                ForeColor = field.IsRequired ? Color.DarkBlue : SystemColors.ControlText,
+                Font = new Font("Segoe UI", 9.5F, field.IsRequired ? FontStyle.Bold : FontStyle.Regular),
+                ForeColor = field.IsRequired ? Color.FromArgb(220, 53, 69) : Color.FromArgb(52, 58, 64),
                 AutoSize = true,
                 Anchor = AnchorStyles.Left | AnchorStyles.Top,
-                Margin = new Padding(0, 6, 10, 3)
+                Margin = new Padding(0, 12, 15, 6),
+                TextAlign = ContentAlignment.MiddleLeft
             };
 
             parent.Controls.Add(label, 0, row);
 
-            // Input control
+            // Input control with modern styling
             Control inputControl;
 
             if (field.IsBoolean)
@@ -119,7 +141,10 @@ namespace VCenterDeployGUI
                 {
                     Text = field.Description,
                     Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
-                    Margin = new Padding(0, 3, 0, 3)
+                    Margin = new Padding(0, 8, 0, 8),
+                    Font = new Font("Segoe UI", 9F),
+                    ForeColor = Color.FromArgb(52, 58, 64),
+                    BackColor = Color.Transparent
                 };
                 
                 if (bool.TryParse(field.DefaultValue, out bool defaultBool))
@@ -134,7 +159,11 @@ namespace VCenterDeployGUI
                 {
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
-                    Margin = new Padding(0, 3, 0, 3)
+                    Margin = new Padding(0, 8, 0, 8),
+                    Font = new Font("Segoe UI", 9F),
+                    Height = 28,
+                    BackColor = Color.White,
+                    ForeColor = Color.FromArgb(52, 58, 64)
                 };
 
                 comboBox.Items.AddRange(field.DropdownOptions);
@@ -151,29 +180,41 @@ namespace VCenterDeployGUI
                 {
                     UseSystemPasswordChar = field.IsPassword,
                     Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
-                    Margin = new Padding(0, 3, 0, 3),
-                    Text = field.DefaultValue
+                    Margin = new Padding(0, 8, 0, 8),
+                    Text = field.DefaultValue,
+                    Font = new Font("Segoe UI", 9F),
+                    Height = 26,
+                    BackColor = Color.White,
+                    ForeColor = Color.FromArgb(52, 58, 64),
+                    BorderStyle = BorderStyle.FixedSingle
                 };
 
                 if (field.IsFilePath)
                 {
                     var panel = new Panel
                     {
-                        Height = 25,
+                        Height = 30,
                         Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
-                        Margin = new Padding(0, 3, 0, 3)
+                        Margin = new Padding(0, 8, 0, 8),
+                        BackColor = Color.Transparent
                     };
 
                     textBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-                    textBox.Width = panel.Width - 75;
+                    textBox.Width = panel.Width - 85;
 
                     var browseButton = new Button
                     {
                         Text = "Browse...",
-                        Width = 70,
-                        Height = 23,
-                        Anchor = AnchorStyles.Top | AnchorStyles.Right
+                        Width = 80,
+                        Height = 26,
+                        Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                        Font = new Font("Segoe UI", 8.5F),
+                        BackColor = Color.FromArgb(0, 123, 255),
+                        ForeColor = Color.White,
+                        FlatStyle = FlatStyle.Flat,
+                        UseVisualStyleBackColor = false
                     };
+                    browseButton.FlatAppearance.BorderSize = 0;
                     browseButton.Left = panel.Width - browseButton.Width;
 
                     browseButton.Click += (s, e) => BrowseForFile(textBox, field);
@@ -183,7 +224,7 @@ namespace VCenterDeployGUI
                     
                     panel.Resize += (s, e) =>
                     {
-                        textBox.Width = panel.Width - 75;
+                        textBox.Width = panel.Width - 85;
                         browseButton.Left = panel.Width - browseButton.Width;
                     };
 
@@ -198,21 +239,22 @@ namespace VCenterDeployGUI
                 textBox.Leave += (s, e) => ValidateField(fieldKey);
             }
 
-            // Add tooltip
+            // Add tooltip with better styling
             var toolTip = new ToolTip();
             toolTip.SetToolTip(inputControl, field.Description);
 
             parent.Controls.Add(inputControl, 1, row);
             fieldControls[fieldKey] = inputControl;
 
-            // Error label
+            // Error label with improved styling
             var errorLabel = new Label
             {
-                ForeColor = Color.Red,
+                ForeColor = Color.FromArgb(220, 53, 69),
                 AutoSize = true,
                 Visible = false,
-                Font = new Font(Font.FontFamily, Font.Size - 1, FontStyle.Regular),
-                Margin = new Padding(0, 0, 0, 6)
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Regular),
+                Margin = new Padding(0, 2, 0, 12),
+                BackColor = Color.Transparent
             };
 
             parent.Controls.Add(errorLabel, 1, row + 1);
@@ -263,18 +305,41 @@ namespace VCenterDeployGUI
                 }
             }
 
-            // Visual feedback
+            // Visual feedback with modern styling
             if (control is TextBox textBox)
             {
-                textBox.BackColor = isValid ? SystemColors.Window : Color.LightPink;
+                textBox.BackColor = isValid ? Color.White : Color.FromArgb(255, 235, 238);
+                textBox.BorderStyle = BorderStyle.FixedSingle;
             }
             else if (control is Panel panel && panel.Controls[0] is TextBox panelTextBox)
             {
-                panelTextBox.BackColor = isValid ? SystemColors.Window : Color.LightPink;
+                panelTextBox.BackColor = isValid ? Color.White : Color.FromArgb(255, 235, 238);
+                panelTextBox.BorderStyle = BorderStyle.FixedSingle;
+            }
+            else if (control is ComboBox comboBox)
+            {
+                comboBox.BackColor = isValid ? Color.White : Color.FromArgb(255, 235, 238);
             }
 
             errorLabel.Text = errorMessage;
             errorLabel.Visible = !isValid;
+            
+            // Add success indicator for valid required fields
+            if (isValid && field.IsRequired && !string.IsNullOrWhiteSpace(value))
+            {
+                if (control is TextBox successTextBox)
+                {
+                    successTextBox.BackColor = Color.FromArgb(240, 253, 244);
+                }
+                else if (control is Panel successPanel && successPanel.Controls[0] is TextBox successPanelTextBox)
+                {
+                    successPanelTextBox.BackColor = Color.FromArgb(240, 253, 244);
+                }
+                else if (control is ComboBox successComboBox)
+                {
+                    successComboBox.BackColor = Color.FromArgb(240, 253, 244);
+                }
+            }
         }
 
         private string GetValidationErrorMessage(string fieldKey)
